@@ -22,7 +22,17 @@ export function registerAlarmTools(server: McpServer) {
   server.tool('list_alarms', 'List all registered bus alarms', {}, async () => {
     try {
       const alarms = await listAlarms();
-      return textResult(alarms);
+      return textResult(alarms.map(a => ({
+        id: a.id,
+        label: a.label,
+        enabled: a.enabled,
+        type: a.type,
+        alertMinutes: a.alertMinutes,
+        stationName: a.station.name,
+        routeName: a.route.name,
+        schedules: a.schedules,
+        channelTypes: a.channels.map(c => c.type),
+      })));
     } catch (error) {
       return errorResult(error);
     }
