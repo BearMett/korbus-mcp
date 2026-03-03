@@ -135,7 +135,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
     {
       name: 'korbus_get_arrivals',
       description:
-        'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (행선지/방면) per route. When presenting results, always group or label by direction so the user knows which way each bus is headed (e.g. "강남역 → 복정역 방면: 452(3분)").',
+        'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (방면) per route—always show it. Present arrivals as: "<방면> 방면 (<arsId> 정류장): N분 후". Internal IDs (routeId, stationId) are for tool chaining only; never show them to users.',
       parameters: Type.Object({
         station_id: Type.String({
           minLength: 1,
@@ -169,7 +169,9 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
           });
           if (routes.length) await upsertRoutes(routes);
 
-          return textResult(arrivals);
+          // Strip vehicleId – internal field not useful for LLM presentation
+          const slim = arrivals.map(({ vehicleId: _, ...rest }) => rest);
+          return textResult(slim);
         } catch (error) {
           return errorResult(error);
         }
