@@ -1,31 +1,58 @@
 {
   "name": "korbus-mcp",
   "version": "0.1.0",
+  "description": "MCP server for Seoul & Gyeonggi real-time bus arrival info, station/route search, and alarm notifications",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "author": "BearMett",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BearMett/korbus-mcp.git"
+  },
+  "homepage": "https://github.com/BearMett/korbus-mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "bus",
+    "seoul",
+    "gyeonggi",
+    "korea",
+    "transit",
+    "real-time"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bin": {
+    "korbus-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "prisma/schema.prisma",
+    "prisma/migrations"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs');const f='dist/index.js';const c=fs.readFileSync(f,'utf8');if(!c.startsWith('#!'))fs.writeFileSync(f,'#!/usr/bin/env node\\n'+c)\"",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "postinstall": "prisma generate",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@prisma/client": "^6.5.0",
-    "@prisma/adapter-better-sqlite3": "^6.5.0",
-    "better-sqlite3": "^11.9.1",
+    "prisma": "^6.5.0",
     "axios": "^1.7.9",
     "fast-xml-parser": "^5.2.0",
     "node-cron": "^3.0.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "prisma": "^6.5.0",
     "typescript": "^5.7.3",
     "@types/node": "^22.13.5",
     "@types/node-cron": "^3.0.11",
-    "@types/better-sqlite3": "^7.6.12",
     "tsx": "^4.19.3"
   }
 }

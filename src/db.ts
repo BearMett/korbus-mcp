@@ -1,6 +1,8 @@
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
 import type {
@@ -32,12 +34,18 @@ export async function initDb(): Promise<PrismaClient> {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const repoRoot = path.resolve(currentDir, '..');
   const schemaPath = path.resolve(repoRoot, 'prisma/schema.prisma');
-  const defaultDbUrl = `file:${path.resolve(repoRoot, 'prisma/dev.db')}`;
+
+  const defaultDbDir = path.resolve(os.homedir(), '.korbus-mcp');
+  mkdirSync(defaultDbDir, { recursive: true });
+  const defaultDbUrl = `file:${path.resolve(defaultDbDir, 'korbus.db')}`;
   const databaseUrl = process.env.DATABASE_URL ?? defaultDbUrl;
 
   if (existsSync(schemaPath)) {
     try {
-      execSync(`npx prisma migrate deploy --schema "${schemaPath}"`, {
+      const require = createRequire(import.meta.url);
+      const prismaPkg = path.dirname(require.resolve('prisma/package.json'));
+      const prismaBin = path.resolve(prismaPkg, 'build', 'index.js');
+      execSync(`node "${prismaBin}" migrate deploy --schema "${schemaPath}"`, {
         cwd: repoRoot,
         stdio: 'pipe',
         env: { ...process.env, DATABASE_URL: databaseUrl },
