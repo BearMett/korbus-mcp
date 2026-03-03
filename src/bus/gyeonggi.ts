@@ -33,6 +33,7 @@ export function createGyeonggiAdapter(apiKey: string) {
       });
       return extractBody(res.data, 'busStationList').map((item: any) => ({
         id: String(item.stationId),
+        arsId: item.mobileNo ? String(item.mobileNo) : undefined,
         name: String(item.stationName),
         region: 'GYEONGGI' as const,
         posX: item.x != null ? Number(item.x) : undefined,
