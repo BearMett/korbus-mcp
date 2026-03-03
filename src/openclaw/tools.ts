@@ -186,6 +186,16 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             stationRef,
             params.route_id as string | undefined,
           );
+
+          // Auto-cache routes discovered via arrivals
+          const seen = new Set<string>();
+          const routes = arrivals.flatMap((a) => {
+            if (seen.has(a.routeId)) return [];
+            seen.add(a.routeId);
+            return [{ id: a.routeId, name: a.routeName, region: stationRef.region }];
+          });
+          if (routes.length) await upsertRoutes(routes);
+
           return textResult(arrivals);
         } catch (error) {
           return errorResult(error);
