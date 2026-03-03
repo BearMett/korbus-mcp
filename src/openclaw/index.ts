@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { createBusGateway } from '../bus/gateway.js';
-import { createDispatcher } from '../notifier/dispatcher.js';
+import { createOpenClawDispatcher, type OpenClawRuntimeApi } from './dispatcher.js';
 import { registerKorbusTools } from './tools.js';
 import { createKorbusService } from './service.js';
 
-interface PluginAPI {
+interface PluginAPI extends OpenClawRuntimeApi {
   pluginConfig: Record<string, unknown>;
   stateDir: string;
   registerTool(tool: unknown, options?: { optional?: boolean }): void;
@@ -24,10 +24,6 @@ function readConfig(api: PluginAPI) {
     '';
   const seoulApiKey = apiKey;
   const gyeonggiApiKey = apiKey;
-  const telegramBotToken =
-    (cfg.telegramBotToken as string) ||
-    process.env.TELEGRAM_BOT_TOKEN ||
-    undefined;
 
   const stateDir = api.stateDir || path.join(process.env.HOME || '/tmp', '.openclaw');
   const databasePath =
@@ -37,7 +33,7 @@ function readConfig(api: PluginAPI) {
 
   const pollEnabled = (cfg.pollEnabled as boolean) ?? true;
 
-  return { seoulApiKey, gyeonggiApiKey, telegramBotToken, databaseUrl, pollEnabled };
+  return { seoulApiKey, gyeonggiApiKey, databaseUrl, pollEnabled };
 }
 
 const plugin = {
@@ -54,9 +50,7 @@ const plugin = {
       gyeonggiApiKey: config.gyeonggiApiKey,
     });
 
-    const dispatcher = createDispatcher({
-      telegramBotToken: config.telegramBotToken,
-    });
+    const dispatcher = createOpenClawDispatcher(api);
 
     registerKorbusTools(api as any, { gateway, dispatcher });
 

@@ -89,7 +89,19 @@ const ChannelSchema = Type.Union([
   }),
   Type.Object({
     type: Type.Literal('TELEGRAM'),
-    config: Type.Object({ chatId: Type.String({ minLength: 1 }) }),
+    config: Type.Optional(Type.Object({ chatId: Type.String({ minLength: 1 }) })),
+  }),
+  Type.Object({
+    type: Type.Literal('DISCORD'),
+    config: Type.Optional(Type.Object({ channelId: Type.String({ minLength: 1 }) })),
+  }),
+  Type.Object({
+    type: Type.Literal('SLACK'),
+    config: Type.Optional(Type.Object({ channelId: Type.String({ minLength: 1 }) })),
+  }),
+  Type.Object({
+    type: Type.Literal('SIGNAL'),
+    config: Type.Optional(Type.Object({ to: Type.String({ minLength: 1 }) })),
   }),
 ]);
 
