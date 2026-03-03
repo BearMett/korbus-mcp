@@ -41,6 +41,7 @@ export type ChannelConfig =
 
 export interface StationRef {
   id: string;
+  name: string;
   region: Region;
   arsId?: string | null;
 }

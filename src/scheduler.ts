@@ -45,6 +45,7 @@ export async function pollActiveAlarms(
       const first = groupAlarms[0];
       const stationRef: StationRef = {
         id: first.station.id,
+        name: first.station.name,
         region: first.station.region as Region,
         arsId: first.station.arsId,
       };

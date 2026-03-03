@@ -265,6 +265,7 @@ export async function findStationById(
   if (!row) return null;
   return {
     id: row.id,
+    name: row.name,
     region: row.region as Region,
     arsId: row.arsId,
   };

@@ -8,7 +8,7 @@ import { textResult, errorResult } from './helpers.js';
 export function registerArrivalTools(server: McpServer, gateway: BusGateway) {
   server.tool(
     'get_arrivals',
-    'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (방면) per route—always show it. Present arrivals as: "<방면> 방면 (<arsId> 정류장): N분 후". Internal IDs (routeId, stationId) are for tool chaining only; never show them to users.',
+    'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (방면), `stationName`, and `arsId` per item. Present arrivals as: "<방면> 방면 (<stationName> <arsId>): N분 후". Internal IDs (routeId, stationId) are for tool chaining only; never show them to users.',
     {
       station_id: z.string().min(1).describe('Station ID (from search_stations)'),
       route_id: z.string().optional().describe('Route ID to filter (from search_routes)'),
@@ -34,8 +34,12 @@ export function registerArrivalTools(server: McpServer, gateway: BusGateway) {
         });
         if (routes.length) await upsertRoutes(routes);
 
-        // Strip vehicleId – internal field not useful for LLM presentation
-        const slim = arrivals.map(({ vehicleId: _, ...rest }) => rest);
+        // Enrich with station context & strip vehicleId
+        const slim = arrivals.map(({ vehicleId: _, ...rest }) => ({
+          ...rest,
+          stationName: stationRef.name,
+          arsId: stationRef.arsId,
+        }));
         return textResult(slim);
       } catch (error) {
         return errorResult(error);
