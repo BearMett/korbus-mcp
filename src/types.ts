@@ -11,6 +11,8 @@ export type DayOfWeek =
 
 export type ChannelType = 'CONSOLE' | 'WEBHOOK' | 'TELEGRAM';
 
+export type AlarmType = 'RECURRING' | 'ONCE';
+
 export interface ScheduleWindow {
   dayOfWeek: DayOfWeek[];
   startTime: string; // HH:mm
@@ -78,6 +80,9 @@ export interface Alarm {
   stationId: string;
   routeId: string;
   alertMinutes: number;
+  type: AlarmType;
+  activeUntil?: Date | null;
+  firedAt?: Date | null;
   enabled: boolean;
   schedules: ScheduleWindow[];
   channels: AlarmChannel[];
@@ -95,6 +100,15 @@ export interface CreateAlarmInput {
   routeId: string;
   alertMinutes: number;
   schedules: ScheduleWindow[];
+  channels: ChannelConfig[];
+}
+
+export interface CreateOnceAlarmInput {
+  label?: string;
+  stationId: string;
+  routeId: string;
+  alertMinutes: number;
+  activeUntil?: string; // "HH:mm" or ISO datetime
   channels: ChannelConfig[];
 }
 

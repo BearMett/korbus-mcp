@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { listActiveAlarms, hasRecentNotification, createNotificationLog } from './db.js';
+import { listActiveAlarms, hasRecentNotification, createNotificationLog, markAlarmFired } from './db.js';
 import type { BusGateway } from './bus/gateway.js';
 import type { Dispatcher } from './notifier/dispatcher.js';
 import type { AlarmWithRelations, PollResult, StationRef, Region } from './types.js';
@@ -52,6 +52,8 @@ export async function pollActiveAlarms(
       const arrivals = await deps.gateway.getArrivals(stationRef, first.route.id);
 
       for (const alarm of groupAlarms) {
+        let alarmFired = false;
+
         for (const arrival of arrivals) {
           if (arrival.arrivalSec > alarm.alertMinutes * 60) continue;
 
@@ -86,7 +88,13 @@ export async function pollActiveAlarms(
               message: arrival.arrivalMsg,
               channel: alarm.channels.map((c) => c.type).join(','),
             });
+            alarmFired = true;
           }
+        }
+
+        // Mark ONCE alarms as fired after successful notification
+        if (alarmFired && alarm.type === 'ONCE') {
+          await markAlarmFired(alarm.id);
         }
       }
     }),

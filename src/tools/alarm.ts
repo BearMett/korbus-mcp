@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { createAlarm, listAlarms, findAlarm, updateAlarm, deleteAlarm } from '../db.js';
+import { createAlarm, createOnceAlarm, listAlarms, findAlarm, updateAlarm, deleteAlarm } from '../db.js';
 import { CoreError } from '../errors.js';
 import { textResult, errorResult } from './helpers.js';
 
@@ -30,7 +30,7 @@ export function registerAlarmTools(server: McpServer) {
 
   server.tool(
     'create_alarm',
-    'Create a bus arrival alarm',
+    'Create a recurring bus arrival alarm',
     {
       station_id: z.string().min(1).describe('Station ID'),
       route_id: z.string().min(1).describe('Route ID'),
@@ -47,6 +47,34 @@ export function registerAlarmTools(server: McpServer) {
           label: input.label,
           alertMinutes: input.alert_minutes,
           schedules: input.schedules,
+          channels: input.channels as any,
+        });
+        return textResult(alarm);
+      } catch (error) {
+        return errorResult(error);
+      }
+    },
+  );
+
+  server.tool(
+    'create_once_alarm',
+    'Create a one-time bus arrival alarm (fires once then expires)',
+    {
+      station_id: z.string().min(1).describe('Station ID'),
+      route_id: z.string().min(1).describe('Route ID'),
+      label: z.string().optional().describe('Label for this alarm'),
+      alert_minutes: z.number().int().min(1).max(30).describe('Alert when bus is within N minutes'),
+      active_until: z.string().optional().describe('Monitor until this time (HH:mm or ISO datetime). Omit to monitor indefinitely until fired.'),
+      channels: z.array(channelSchema).describe('How to notify'),
+    },
+    async (input) => {
+      try {
+        const alarm = await createOnceAlarm({
+          stationId: input.station_id,
+          routeId: input.route_id,
+          label: input.label,
+          alertMinutes: input.alert_minutes,
+          activeUntil: input.active_until,
           channels: input.channels as any,
         });
         return textResult(alarm);

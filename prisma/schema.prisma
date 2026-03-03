@@ -32,6 +32,9 @@ model Alarm {
   routeId      String
   route        Route             @relation(fields: [routeId], references: [id])
   alertMinutes Int               @default(5)
+  type         String            @default("RECURRING")
+  activeUntil  DateTime?
+  firedAt      DateTime?
   schedules    AlarmSchedule[]
   channels     AlarmChannel[]
   logs         NotificationLog[]

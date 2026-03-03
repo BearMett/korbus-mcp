@@ -7,6 +7,7 @@ import {
   findStationById,
   listAlarms,
   createAlarm,
+  createOnceAlarm,
   findAlarm,
   updateAlarm,
   deleteAlarm,
@@ -216,7 +217,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_create_alarm',
-      description: 'Create a bus arrival alarm',
+      description: 'Create a recurring bus arrival alarm',
       parameters: Type.Object({
         station_id: Type.String({ minLength: 1, description: 'Station ID' }),
         route_id: Type.String({ minLength: 1, description: 'Route ID' }),
@@ -237,6 +238,47 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             label: params.label as string | undefined,
             alertMinutes: params.alert_minutes as number,
             schedules: params.schedules as any,
+            channels: params.channels as ChannelConfig[],
+          });
+          return textResult(alarm);
+        } catch (error) {
+          return errorResult(error);
+        }
+      },
+    },
+    { optional: true },
+  );
+
+  // ── create_once_alarm ──
+  api.registerTool(
+    {
+      name: 'korbus_create_once_alarm',
+      description: 'Create a one-time bus arrival alarm (fires once then expires)',
+      parameters: Type.Object({
+        station_id: Type.String({ minLength: 1, description: 'Station ID' }),
+        route_id: Type.String({ minLength: 1, description: 'Route ID' }),
+        label: Type.Optional(Type.String({ description: 'Label for this alarm' })),
+        alert_minutes: Type.Integer({
+          minimum: 1,
+          maximum: 30,
+          description: 'Alert when bus is within N minutes',
+        }),
+        active_until: Type.Optional(
+          Type.String({
+            description:
+              'Monitor until this time (HH:mm or ISO datetime). Omit to monitor indefinitely until fired.',
+          }),
+        ),
+        channels: Type.Array(ChannelSchema, { description: 'How to notify' }),
+      }),
+      async execute(_id, params) {
+        try {
+          const alarm = await createOnceAlarm({
+            stationId: params.station_id as string,
+            routeId: params.route_id as string,
+            label: params.label as string | undefined,
+            alertMinutes: params.alert_minutes as number,
+            activeUntil: params.active_until as string | undefined,
             channels: params.channels as ChannelConfig[],
           });
           return textResult(alarm);

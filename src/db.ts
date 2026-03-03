@@ -11,8 +11,10 @@ import type {
   StationRef,
   Region,
   DayOfWeek,
+  AlarmType,
   AlarmWithRelations,
   CreateAlarmInput,
+  CreateOnceAlarmInput,
   UpdateAlarmInput,
   ScheduleWindow,
   AlarmChannel,
@@ -88,6 +90,9 @@ interface PrismaAlarmRow {
   stationId: string;
   routeId: string;
   alertMinutes: number;
+  type: string;
+  activeUntil: Date | null;
+  firedAt: Date | null;
   enabled: boolean;
   createdAt: Date;
   station: {
@@ -136,6 +141,9 @@ function mapAlarmWithRelations(row: PrismaAlarmRow): AlarmWithRelations {
     stationId: row.stationId,
     routeId: row.routeId,
     alertMinutes: row.alertMinutes,
+    type: row.type as AlarmType,
+    activeUntil: row.activeUntil,
+    firedAt: row.firedAt,
     enabled: row.enabled,
     schedules,
     channels,
@@ -386,6 +394,54 @@ export async function deleteAlarm(alarmId: string): Promise<void> {
   await db.alarm.delete({ where: { id: alarmId } });
 }
 
+/** Create a one-time alarm (no schedules). */
+export async function createOnceAlarm(
+  input: CreateOnceAlarmInput,
+): Promise<AlarmWithRelations> {
+  const db = getDb();
+
+  let activeUntil: Date | null = null;
+  if (input.activeUntil) {
+    if (/^\d{2}:\d{2}$/.test(input.activeUntil)) {
+      const [hh, mm] = input.activeUntil.split(':').map(Number);
+      const d = new Date();
+      d.setHours(hh, mm, 0, 0);
+      activeUntil = d;
+    } else {
+      activeUntil = new Date(input.activeUntil);
+    }
+  }
+
+  const row = await db.alarm.create({
+    data: {
+      stationId: input.stationId,
+      routeId: input.routeId,
+      label: input.label ?? null,
+      alertMinutes: input.alertMinutes,
+      type: 'ONCE',
+      activeUntil,
+      channels: {
+        create: input.channels.map((c) => ({
+          type: c.type,
+          config: JSON.stringify(c.config ?? {}),
+        })),
+      },
+    },
+    include: ALARM_INCLUDE,
+  });
+
+  return mapAlarmWithRelations(row as PrismaAlarmRow);
+}
+
+/** Mark a one-time alarm as fired. */
+export async function markAlarmFired(alarmId: string): Promise<void> {
+  const db = getDb();
+  await db.alarm.update({
+    where: { id: alarmId },
+    data: { firedAt: new Date() },
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Scheduling helpers
 // ---------------------------------------------------------------------------
@@ -394,10 +450,8 @@ export async function deleteAlarm(alarmId: string): Promise<void> {
  * List all *active* alarms whose schedule matches the given `now` timestamp.
  *
  * "Active" means:
- *   1. `enabled` is true
- *   2. At least one schedule row whose comma-joined `dayOfWeek` contains the
- *      current day abbreviation, and the current HH:mm falls between
- *      `startTime` and `endTime` (inclusive).
+ *   - RECURRING: `enabled` is true and at least one schedule row matches now.
+ *   - ONCE: `enabled` is true, `firedAt` is null, and `activeUntil` is null or >= now.
  */
 export async function listActiveAlarms(
   now: Date,
@@ -418,9 +472,11 @@ export async function listActiveAlarms(
   const mm = String(now.getMinutes()).padStart(2, '0');
   const currentTime = `${hh}:${mm}`;
 
-  const rows = await db.alarm.findMany({
+  // RECURRING alarms: match by schedule
+  const recurringRows = await db.alarm.findMany({
     where: {
       enabled: true,
+      type: 'RECURRING',
       schedules: {
         some: {
           dayOfWeek: { contains: currentDay },
@@ -432,7 +488,22 @@ export async function listActiveAlarms(
     include: ALARM_INCLUDE,
   });
 
-  return rows.map((r) => mapAlarmWithRelations(r as PrismaAlarmRow));
+  // ONCE alarms: not yet fired, within activeUntil window
+  const onceRows = await db.alarm.findMany({
+    where: {
+      enabled: true,
+      type: 'ONCE',
+      firedAt: null,
+      OR: [
+        { activeUntil: null },
+        { activeUntil: { gte: now } },
+      ],
+    },
+    include: ALARM_INCLUDE,
+  });
+
+  const allRows = [...recurringRows, ...onceRows];
+  return allRows.map((r) => mapAlarmWithRelations(r as PrismaAlarmRow));
 }
 
 // ---------------------------------------------------------------------------
