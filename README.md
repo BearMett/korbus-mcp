@@ -108,6 +108,8 @@ openclaw plugins list        # korbus-mcp 표시 확인
 openclaw doctor              # 전체 상태 점검
 ```
 
+> **`child_process` 경고**: 설치 시 "Shell command execution detected" 경고가 표시될 수 있습니다. 이는 알람 알림 전송 시 `openclaw message send` CLI를 호출하기 위한 것으로, 임의의 셸 명령을 실행하지 않습니다.
+
 ### B. Standalone MCP 서버
 
 MCP 클라이언트(Claude Desktop, Cursor 등)에서 직접 실행합니다:
