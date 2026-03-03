@@ -79,33 +79,6 @@ const ScheduleSchema = Type.Object({
   endTime: Type.String({ pattern: '^\\d{2}:\\d{2}$' }),
 });
 
-const ChannelSchema = Type.Union([
-  Type.Object({
-    type: Type.Literal('CONSOLE'),
-    config: Type.Optional(Type.Object({}, { additionalProperties: false })),
-  }),
-  Type.Object({
-    type: Type.Literal('WEBHOOK'),
-    config: Type.Object({ url: Type.String({ format: 'uri' }) }),
-  }),
-  Type.Object({
-    type: Type.Literal('TELEGRAM'),
-    config: Type.Optional(Type.Object({ chatId: Type.String({ minLength: 1 }) })),
-  }),
-  Type.Object({
-    type: Type.Literal('DISCORD'),
-    config: Type.Optional(Type.Object({ channelId: Type.String({ minLength: 1 }) })),
-  }),
-  Type.Object({
-    type: Type.Literal('SLACK'),
-    config: Type.Optional(Type.Object({ channelId: Type.String({ minLength: 1 }) })),
-  }),
-  Type.Object({
-    type: Type.Literal('SIGNAL'),
-    config: Type.Optional(Type.Object({ to: Type.String({ minLength: 1 }) })),
-  }),
-]);
-
 // ---------------------------------------------------------------------------
 // Tool registration
 // ---------------------------------------------------------------------------
@@ -354,7 +327,12 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
           ),
           enabled: Type.Optional(Type.Boolean()),
           schedules: Type.Optional(Type.Array(ScheduleSchema)),
-          channels: Type.Optional(Type.Array(ChannelSchema)),
+          channel: Type.Optional(Type.String({
+            description: 'Notification channel (e.g. telegram, discord, slack)',
+          })),
+          to: Type.Optional(Type.String({
+            description: 'Recipient ID (e.g. chat ID, channel ID)',
+          })),
         }),
       }),
       async execute(_id, params) {
@@ -368,7 +346,16 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
               retryable: false,
             });
           }
-          const updated = await updateAlarm(alarmId, params.patch as any);
+          const patch = params.patch as Record<string, unknown>;
+          const updateInput: Record<string, unknown> = {};
+          if (patch.label !== undefined) updateInput.label = patch.label;
+          if (patch.alertMinutes !== undefined) updateInput.alertMinutes = patch.alertMinutes;
+          if (patch.enabled !== undefined) updateInput.enabled = patch.enabled;
+          if (patch.schedules !== undefined) updateInput.schedules = patch.schedules;
+          if (patch.channel && patch.to) {
+            updateInput.channels = [{ type: patch.channel as string, config: { to: patch.to as string } }];
+          }
+          const updated = await updateAlarm(alarmId, updateInput as any);
           return textResult({
             id: updated.id,
             label: updated.label,
