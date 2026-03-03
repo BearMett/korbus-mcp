@@ -16,7 +16,8 @@ export function createSeoulAdapter(apiKey: string) {
     if (header) {
       const code = String(header.headerCd);
       const msg = String(header.headerMsg ?? '');
-      if (code === '4' || code === '3') throw apiKeyError('서울', msg);
+      if (code === '3') throw apiKeyError('서울', msg);
+      if (code === '4') return []; // "결과가 없습니다" – empty result, not an error
       if (code === '5') throw apiKeyExpiredError('서울');
       if (code === '8') throw rateLimitError('서울');
     }
