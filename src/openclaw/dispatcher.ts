@@ -1,17 +1,16 @@
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import type { Dispatcher } from '../notifier/dispatcher.js';
 import type { NotificationPayload } from '../types.js';
 
+const execFileAsync = promisify(execFile);
+
 // ---------------------------------------------------------------------------
-// OpenClaw Plugin API shape (system event subset)
+// OpenClaw Plugin API shape (logger only — no session needed)
 // ---------------------------------------------------------------------------
 
 export interface OpenClawRuntimeApi {
   logger: { info(msg: string): void; warn(msg: string): void; error(msg: string): void };
-  runtime: {
-    system: {
-      enqueueSystemEvent(event: { text: string }): void;
-    };
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -19,7 +18,17 @@ export interface OpenClawRuntimeApi {
 // ---------------------------------------------------------------------------
 
 function formatMessage(p: NotificationPayload): string {
-  return `🚌 ${p.routeName} → ${p.stationName}\n${p.arrivalMsg} (${p.arrivalSec}s)`;
+  return `🚌 ${p.routeName} → ${p.stationName}\n${p.arrivalMsg}`;
+}
+
+/** Extract recipient ID from a channel config JSON string. */
+function parseTarget(configJson: string): string | undefined {
+  try {
+    const cfg = JSON.parse(configJson || '{}');
+    return cfg.to ?? cfg.chatId ?? cfg.channelId ?? undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -36,10 +45,26 @@ export function createOpenClawDispatcher(api: OpenClawRuntimeApi): Dispatcher {
         return;
       }
 
-      // Delegate to agent → OpenClaw routes response to originating channel
-      api.runtime.system.enqueueSystemEvent({
-        text: `[KorBus 알림] ${text}\n\n이 알림을 적절한 채널(${channel.type})로 전달해주세요.`,
-      });
+      const target = parseTarget(channel.config);
+      if (!target) {
+        api.logger.warn(
+          `[KorBus] No target for channel ${channel.type}, skipping dispatch`,
+        );
+        return;
+      }
+
+      try {
+        await execFileAsync('openclaw', [
+          'message', 'send',
+          '--channel', channel.type.toLowerCase(),
+          '--target', target,
+          '--message', `[KorBus 알림] ${text}`,
+        ]);
+      } catch (err) {
+        api.logger.error(
+          `[KorBus] dispatch failed (${channel.type}): ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
     },
   };
 }

@@ -238,6 +238,14 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
           description: 'Alert when bus is within N minutes',
         }),
         schedules: Type.Array(ScheduleSchema, { description: 'When to monitor' }),
+        channel: Type.String({
+          description:
+            'Notification channel (e.g. telegram, discord, slack). Use the current conversation channel if not specified by user.',
+        }),
+        to: Type.String({
+          description:
+            'Recipient ID (e.g. chat ID, channel ID). Use the current conversation target if not specified by user.',
+        }),
       }),
       async execute(_id, params) {
         try {
@@ -247,7 +255,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             label: params.label as string | undefined,
             alertMinutes: params.alert_minutes as number,
             schedules: params.schedules as any,
-            channels: [{ type: 'SYSTEM' }] as unknown as ChannelConfig[],
+            channels: [{ type: params.channel as string, config: { to: params.to as string } }] as unknown as ChannelConfig[],
           });
           return textResult(alarm);
         } catch (error) {
@@ -278,6 +286,14 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
               'Monitor until this time (HH:mm or ISO datetime). Omit to monitor indefinitely until fired.',
           }),
         ),
+        channel: Type.String({
+          description:
+            'Notification channel (e.g. telegram, discord, slack). Use the current conversation channel if not specified by user.',
+        }),
+        to: Type.String({
+          description:
+            'Recipient ID (e.g. chat ID, channel ID). Use the current conversation target if not specified by user.',
+        }),
       }),
       async execute(_id, params) {
         try {
@@ -287,7 +303,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             label: params.label as string | undefined,
             alertMinutes: params.alert_minutes as number,
             activeUntil: params.active_until as string | undefined,
-            channels: [{ type: 'SYSTEM' }] as unknown as ChannelConfig[],
+            channels: [{ type: params.channel as string, config: { to: params.to as string } }] as unknown as ChannelConfig[],
           });
           return textResult(alarm);
         } catch (error) {
