@@ -59,7 +59,15 @@ export function registerAlarmTools(server: McpServer) {
           schedules: input.schedules,
           channels: input.channels as any,
         });
-        return textResult(alarm);
+        return textResult({
+          id: alarm.id,
+          label: alarm.label,
+          enabled: alarm.enabled,
+          type: alarm.type,
+          alertMinutes: alarm.alertMinutes,
+          stationName: alarm.station.name,
+          routeName: alarm.route.name,
+        });
       } catch (error) {
         return errorResult(error);
       }
@@ -87,7 +95,15 @@ export function registerAlarmTools(server: McpServer) {
           activeUntil: input.active_until,
           channels: input.channels as any,
         });
-        return textResult(alarm);
+        return textResult({
+          id: alarm.id,
+          label: alarm.label,
+          enabled: alarm.enabled,
+          type: alarm.type,
+          alertMinutes: alarm.alertMinutes,
+          stationName: alarm.station.name,
+          routeName: alarm.route.name,
+        });
       } catch (error) {
         return errorResult(error);
       }
@@ -114,7 +130,15 @@ export function registerAlarmTools(server: McpServer) {
           throw new CoreError({ code: 'NOT_FOUND', message: `Alarm not found: ${alarm_id}`, retryable: false });
         }
         const updated = await updateAlarm(alarm_id, patch as any);
-        return textResult(updated);
+        return textResult({
+          id: updated.id,
+          label: updated.label,
+          enabled: updated.enabled,
+          type: updated.type,
+          alertMinutes: updated.alertMinutes,
+          stationName: updated.station.name,
+          routeName: updated.route.name,
+        });
       } catch (error) {
         return errorResult(error);
       }

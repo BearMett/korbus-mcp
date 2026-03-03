@@ -267,7 +267,15 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             schedules: params.schedules as any,
             channels: [{ type: params.channel as string, config: { to: params.to as string } }] as unknown as ChannelConfig[],
           });
-          return textResult(alarm);
+          return textResult({
+            id: alarm.id,
+            label: alarm.label,
+            enabled: alarm.enabled,
+            type: alarm.type,
+            alertMinutes: alarm.alertMinutes,
+            stationName: alarm.station.name,
+            routeName: alarm.route.name,
+          });
         } catch (error) {
           return errorResult(error);
         }
@@ -315,7 +323,15 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             activeUntil: params.active_until as string | undefined,
             channels: [{ type: params.channel as string, config: { to: params.to as string } }] as unknown as ChannelConfig[],
           });
-          return textResult(alarm);
+          return textResult({
+            id: alarm.id,
+            label: alarm.label,
+            enabled: alarm.enabled,
+            type: alarm.type,
+            alertMinutes: alarm.alertMinutes,
+            stationName: alarm.station.name,
+            routeName: alarm.route.name,
+          });
         } catch (error) {
           return errorResult(error);
         }
@@ -353,7 +369,15 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             });
           }
           const updated = await updateAlarm(alarmId, params.patch as any);
-          return textResult(updated);
+          return textResult({
+            id: updated.id,
+            label: updated.label,
+            enabled: updated.enabled,
+            type: updated.type,
+            alertMinutes: updated.alertMinutes,
+            stationName: updated.station.name,
+            routeName: updated.route.name,
+          });
         } catch (error) {
           return errorResult(error);
         }
