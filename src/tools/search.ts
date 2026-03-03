@@ -7,7 +7,7 @@ import { textResult, errorResult } from './helpers.js';
 export function registerSearchTools(server: McpServer, gateway: BusGateway) {
   server.tool(
     'search_stations',
-    'Search bus stations by name (Seoul + Gyeonggi)',
+    'Search bus stations by name (Seoul + Gyeonggi). Note: a single station name (e.g. "강남역") often maps to multiple physical stops serving opposite directions. After calling get_arrivals, use the `direction` field to distinguish and label each stop for the user.',
     { query: z.string().min(1).describe('Station name to search') },
     async ({ query }) => {
       try {

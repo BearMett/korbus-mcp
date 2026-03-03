@@ -8,7 +8,7 @@ import { textResult, errorResult } from './helpers.js';
 export function registerArrivalTools(server: McpServer, gateway: BusGateway) {
   server.tool(
     'get_arrivals',
-    'Get real-time bus arrival info for a station (optionally filtered by route)',
+    'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (행선지/방면) per route. When presenting results, always group or label by direction so the user knows which way each bus is headed (e.g. "강남역 → 복정역 방면: 452(3분)").',
     {
       station_id: z.string().min(1).describe('Station ID (from search_stations)'),
       route_id: z.string().optional().describe('Route ID to filter (from search_routes)'),

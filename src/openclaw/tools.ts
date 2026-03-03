@@ -88,7 +88,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_search_stations',
-      description: 'Search bus stations by name (Seoul + Gyeonggi)',
+      description: 'Search bus stations by name (Seoul + Gyeonggi). Note: a single station name (e.g. "강남역") often maps to multiple physical stops serving opposite directions. After calling korbus_get_arrivals, use the `direction` field to distinguish and label each stop for the user.',
       parameters: Type.Object({
         query: Type.String({ minLength: 1, description: 'Station name to search' }),
       }),
@@ -135,7 +135,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
     {
       name: 'korbus_get_arrivals',
       description:
-        'Get real-time bus arrival info for a station (optionally filtered by route)',
+        'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (행선지/방면) per route. When presenting results, always group or label by direction so the user knows which way each bus is headed (e.g. "강남역 → 복정역 방면: 452(3분)").',
       parameters: Type.Object({
         station_id: Type.String({
           minLength: 1,
