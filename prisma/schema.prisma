@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Station {
+  id     String  @id
+  arsId  String?
+  name   String
+  region String
+  posX   Float?
+  posY   Float?
+  alarms Alarm[]
+}
+
+model Route {
+  id     String  @id
+  name   String
+  region String
+  alarms Alarm[]
+}
+
+model Alarm {
+  id           String            @id @default(uuid())
+  label        String?
+  stationId    String
+  station      Station           @relation(fields: [stationId], references: [id])
+  routeId      String
+  route        Route             @relation(fields: [routeId], references: [id])
+  alertMinutes Int               @default(5)
+  schedules    AlarmSchedule[]
+  channels     AlarmChannel[]
+  logs         NotificationLog[]
+  enabled      Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+}
+
+model AlarmSchedule {
+  id        String @id @default(uuid())
+  alarmId   String
+  alarm     Alarm  @relation(fields: [alarmId], references: [id], onDelete: Cascade)
+  dayOfWeek String
+  startTime String
+  endTime   String
+}
+
+model AlarmChannel {
+  id      String @id @default(uuid())
+  alarmId String
+  alarm   Alarm  @relation(fields: [alarmId], references: [id], onDelete: Cascade)
+  type    String
+  config  String @default("{}")
+}
+
+model NotificationLog {
+  id        String   @id @default(uuid())
+  alarmId   String
+  alarm     Alarm    @relation(fields: [alarmId], references: [id], onDelete: Cascade)
+  vehicleId String
+  message   String
+  channel   String
+  sentAt    DateTime @default(now())
+
+  @@index([alarmId, vehicleId, sentAt])
+}

@@ -1,0 +1,31 @@
+{
+  "name": "korbus-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@prisma/client": "^6.5.0",
+    "@prisma/adapter-better-sqlite3": "^6.5.0",
+    "better-sqlite3": "^11.9.1",
+    "axios": "^1.7.9",
+    "fast-xml-parser": "^5.2.0",
+    "node-cron": "^3.0.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.5.0",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.13.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/better-sqlite3": "^7.6.12",
+    "tsx": "^4.19.3"
+  }
+}
