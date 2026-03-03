@@ -62,6 +62,7 @@ export function createGyeonggiAdapter(apiKey: string) {
           routeName: String(item.routeName),
           stationId: String(item.stationId),
           vehicleId: item.plateNo1 ? String(item.plateNo1) : undefined,
+          direction: item.routeDestName ? String(item.routeDestName) : undefined,
           arrivalSec: predictMinutes * 60,
           arrivalMsg: `${predictMinutes}분 후 도착`,
         };

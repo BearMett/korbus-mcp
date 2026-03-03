@@ -65,6 +65,7 @@ export interface Arrival {
   routeName: string;
   stationId: string;
   vehicleId?: string;
+  direction?: string;
   arrivalSec: number;
   arrivalMsg: string;
 }

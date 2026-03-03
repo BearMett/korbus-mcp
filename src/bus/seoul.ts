@@ -68,6 +68,7 @@ export function createSeoulAdapter(apiKey: string) {
           routeName: String(item.rtNm || item.busRouteAbrv),
           stationId: String(item.stId),
           vehicleId: item.vehId1 ? String(item.vehId1) : undefined,
+          direction: item.dir ? String(item.dir) : undefined,
           arrivalSec: Number(item.exps1 || 0),
           arrivalMsg: String(item.arrmsg1),
         }));
