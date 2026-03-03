@@ -227,7 +227,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_create_alarm',
-      description: 'Create a recurring bus arrival alarm',
+      description: 'Create a recurring bus arrival alarm (notifications delivered via OpenClaw)',
       parameters: Type.Object({
         station_id: Type.String({ minLength: 1, description: 'Station ID' }),
         route_id: Type.String({ minLength: 1, description: 'Route ID' }),
@@ -238,7 +238,6 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
           description: 'Alert when bus is within N minutes',
         }),
         schedules: Type.Array(ScheduleSchema, { description: 'When to monitor' }),
-        channels: Type.Array(ChannelSchema, { description: 'How to notify' }),
       }),
       async execute(_id, params) {
         try {
@@ -248,7 +247,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             label: params.label as string | undefined,
             alertMinutes: params.alert_minutes as number,
             schedules: params.schedules as any,
-            channels: params.channels as ChannelConfig[],
+            channels: [{ type: 'SYSTEM' }] as unknown as ChannelConfig[],
           });
           return textResult(alarm);
         } catch (error) {
@@ -263,7 +262,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_create_once_alarm',
-      description: 'Create a one-time bus arrival alarm (fires once then expires)',
+      description: 'Create a one-time bus arrival alarm that fires once then expires (notifications delivered via OpenClaw)',
       parameters: Type.Object({
         station_id: Type.String({ minLength: 1, description: 'Station ID' }),
         route_id: Type.String({ minLength: 1, description: 'Route ID' }),
@@ -279,7 +278,6 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
               'Monitor until this time (HH:mm or ISO datetime). Omit to monitor indefinitely until fired.',
           }),
         ),
-        channels: Type.Array(ChannelSchema, { description: 'How to notify' }),
       }),
       async execute(_id, params) {
         try {
@@ -289,7 +287,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
             label: params.label as string | undefined,
             alertMinutes: params.alert_minutes as number,
             activeUntil: params.active_until as string | undefined,
-            channels: params.channels as ChannelConfig[],
+            channels: [{ type: 'SYSTEM' }] as unknown as ChannelConfig[],
           });
           return textResult(alarm);
         } catch (error) {
