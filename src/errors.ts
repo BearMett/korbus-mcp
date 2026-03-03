@@ -85,12 +85,17 @@ export function toCoreError(error: unknown): CoreError {
         retryable: true,
       });
     }
+    const status = error.response?.status;
+    return new CoreError({
+      code: 'INTERNAL_ERROR',
+      message: `공공데이터 API 요청 실패${status ? ` (HTTP ${status})` : ''}`,
+      retryable: status != null && status >= 500,
+    });
   }
 
   return new CoreError({
     code: 'INTERNAL_ERROR',
     message: error instanceof Error ? error.message : 'Unknown internal error',
-    details: error,
     retryable: false,
   });
 }
