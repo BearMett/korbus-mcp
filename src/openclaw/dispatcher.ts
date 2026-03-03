@@ -58,7 +58,7 @@ export function createOpenClawDispatcher(api: OpenClawRuntimeApi): Dispatcher {
           'message', 'send',
           '--channel', channel.type.toLowerCase(),
           '--target', target,
-          '--message', `[KorBus 알림] ${text}`,
+          '--message', text,
         ]);
       } catch (err) {
         api.logger.error(
