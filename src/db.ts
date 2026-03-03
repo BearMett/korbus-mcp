@@ -153,8 +153,6 @@ function mapAlarmWithRelations(row: PrismaAlarmRow): AlarmWithRelations {
       name: row.station.name,
       region: row.station.region as Region,
       arsId: row.station.arsId,
-      posX: row.station.posX ?? undefined,
-      posY: row.station.posY ?? undefined,
     },
     route: {
       id: row.route.id,
@@ -189,8 +187,6 @@ function mapStation(row: {
     name: row.name,
     region: row.region as Region,
     arsId: row.arsId,
-    posX: row.posX ?? undefined,
-    posY: row.posY ?? undefined,
   };
 }
 
