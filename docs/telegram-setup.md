@@ -22,7 +22,7 @@ korbus-mcp에서 텔레그램으로 버스 도착 알림을 받기 위한 설정
 ### npx 실행 시
 
 ```bash
-BUS_API_KEY=your_key TELEGRAM_BOT_TOKEN=your_bot_token npx korbus-mcp
+KORBUS_DATA_API_KEY=your_key TELEGRAM_BOT_TOKEN=your_bot_token npx korbus-mcp
 ```
 
 ### Claude Desktop
@@ -36,7 +36,7 @@ BUS_API_KEY=your_key TELEGRAM_BOT_TOKEN=your_bot_token npx korbus-mcp
       "command": "npx",
       "args": ["-y", "korbus-mcp"],
       "env": {
-        "BUS_API_KEY": "your_api_key",
+        "KORBUS_DATA_API_KEY": "your_api_key",
         "TELEGRAM_BOT_TOKEN": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
       }
     }
@@ -48,7 +48,7 @@ BUS_API_KEY=your_key TELEGRAM_BOT_TOKEN=your_bot_token npx korbus-mcp
 
 ```bash
 claude mcp add \
-  -e BUS_API_KEY=your_api_key \
+  -e KORBUS_DATA_API_KEY=your_api_key \
   -e TELEGRAM_BOT_TOKEN=your_bot_token \
   korbus -- npx -y korbus-mcp
 ```

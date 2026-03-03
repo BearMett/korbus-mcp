@@ -14,10 +14,10 @@ async function main() {
   await initDb();
 
   // 2. Create bus gateway
-  const busApiKey = process.env.BUS_API_KEY ?? '';
+  const apiKey = process.env.KORBUS_DATA_API_KEY ?? '';
   const gateway = createBusGateway({
-    seoulApiKey: process.env.SEOUL_BUS_API_KEY ?? busApiKey,
-    gyeonggiApiKey: process.env.GYEONGGI_BUS_API_KEY ?? busApiKey,
+    seoulApiKey: apiKey,
+    gyeonggiApiKey: apiKey,
   });
 
   // 3. Create notification dispatcher

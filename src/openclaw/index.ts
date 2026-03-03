@@ -16,25 +16,23 @@ interface PluginAPI {
 }
 
 function readConfig(api: PluginAPI) {
-  const cfg = api.pluginConfig;
+  const cfg = api.pluginConfig ?? {};
 
-  const busApiKey = (process.env.BUS_API_KEY as string) ?? '';
-  const seoulApiKey =
-    (cfg.seoulApiKey as string) ||
-    process.env.SEOUL_BUS_API_KEY ||
-    busApiKey;
-  const gyeonggiApiKey =
-    (cfg.gyeonggiApiKey as string) ||
-    process.env.GYEONGGI_BUS_API_KEY ||
-    busApiKey;
+  const apiKey =
+    (cfg.apiKey as string) ||
+    process.env.KORBUS_DATA_API_KEY ||
+    '';
+  const seoulApiKey = apiKey;
+  const gyeonggiApiKey = apiKey;
   const telegramBotToken =
     (cfg.telegramBotToken as string) ||
     process.env.TELEGRAM_BOT_TOKEN ||
     undefined;
 
+  const stateDir = api.stateDir || path.join(process.env.HOME || '/tmp', '.openclaw');
   const databasePath =
     (cfg.databasePath as string) ||
-    path.join(api.stateDir, 'korbus.db');
+    path.join(stateDir, 'korbus.db');
   const databaseUrl = `file:${databasePath}`;
 
   const pollEnabled = (cfg.pollEnabled as boolean) ?? true;
@@ -43,7 +41,7 @@ function readConfig(api: PluginAPI) {
 }
 
 const plugin = {
-  id: 'korbus',
+  id: 'korbus-mcp',
   name: 'KorBus',
   description:
     'Korean bus arrival info, alarms, and notifications for Seoul and Gyeonggi',
