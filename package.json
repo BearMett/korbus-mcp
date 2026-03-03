@@ -23,6 +23,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "main": "dist/openclaw/index.js",
   "bin": {
     "korbus-mcp": "dist/index.js"
   },
@@ -43,11 +44,20 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@prisma/client": "^6.5.0",
+    "@sinclair/typebox": "0.34.48",
     "prisma": "^6.5.0",
     "axios": "^1.7.9",
     "fast-xml-parser": "^5.2.0",
     "node-cron": "^3.0.3",
     "zod": "^3.24.2"
+  },
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "typescript": "^5.7.3",
