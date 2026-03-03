@@ -135,7 +135,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
     {
       name: 'korbus_get_arrivals',
       description:
-        'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `direction` (방면), `stationName`, and optionally `arsId` per item. Present arrivals as: "<방면> 방면 (<stationName> <arsId>): N분 후". If arsId is absent, omit it. Internal IDs (routeId, stationId) are for tool chaining only; never show them to users.',
+        'Get real-time bus arrival info for a station (optionally filtered by route). Response includes `routeName`, `direction` (방면), `stationName`, and optionally `arsId` per item. Present arrivals as: "<routeName> — <direction> 방면 (<stationName> <arsId>): N분 후". If arsId is absent, omit it. Internal IDs (routeId, stationId) are for tool chaining only; never show them to users.',
       parameters: Type.Object({
         station_id: Type.String({
           minLength: 1,

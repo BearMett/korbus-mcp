@@ -1,6 +1,6 @@
 {
   "name": "korbus-mcp",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "MCP server for Seoul & Gyeonggi real-time bus arrival info, station/route search, and alarm notifications",
   "type": "module",
   "license": "MIT",
