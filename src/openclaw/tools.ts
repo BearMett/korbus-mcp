@@ -115,7 +115,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_search_stations',
-      description: 'Search bus stations by name (Seoul + Gyeonggi) and cache results',
+      description: 'Search bus stations by name (Seoul + Gyeonggi)',
       parameters: Type.Object({
         query: Type.String({ minLength: 1, description: 'Station name to search' }),
       }),
@@ -138,7 +138,7 @@ export function registerKorbusTools(api: PluginAPI, deps: ToolDeps): void {
   api.registerTool(
     {
       name: 'korbus_search_routes',
-      description: 'Search bus routes by name/number (Seoul + Gyeonggi) and cache results',
+      description: 'Search bus routes by name/number (Seoul + Gyeonggi)',
       parameters: Type.Object({
         query: Type.String({ minLength: 1, description: 'Route name/number to search' }),
       }),

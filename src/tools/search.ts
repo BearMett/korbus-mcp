@@ -7,7 +7,7 @@ import { textResult, errorResult } from './helpers.js';
 export function registerSearchTools(server: McpServer, gateway: BusGateway) {
   server.tool(
     'search_stations',
-    'Search bus stations by name (Seoul + Gyeonggi) and cache results',
+    'Search bus stations by name (Seoul + Gyeonggi)',
     { query: z.string().min(1).describe('Station name to search') },
     async ({ query }) => {
       try {
@@ -22,7 +22,7 @@ export function registerSearchTools(server: McpServer, gateway: BusGateway) {
 
   server.tool(
     'search_routes',
-    'Search bus routes by name/number (Seoul + Gyeonggi) and cache results',
+    'Search bus routes by name/number (Seoul + Gyeonggi)',
     { query: z.string().min(1).describe('Route name/number to search') },
     async ({ query }) => {
       try {
