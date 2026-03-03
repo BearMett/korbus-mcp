@@ -1,21 +1,17 @@
 {
-  "id": "korbus",
+  "id": "korbus-mcp",
   "name": "KorBus",
   "description": "Korean bus arrival info, alarms, and notifications for Seoul and Gyeonggi",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
-      "seoulApiKey": { "type": "string" },
-      "gyeonggiApiKey": { "type": "string" },
-      "telegramBotToken": { "type": "string" },
+      "apiKey": { "type": "string", "description": "공공데이터포털 버스 API 인증키 (서울/경기 공용)" },
       "databasePath": { "type": "string" },
       "pollEnabled": { "type": "boolean" }
     }
   },
   "uiHints": {
-    "seoulApiKey": { "label": "Seoul Bus API Key", "sensitive": true },
-    "gyeonggiApiKey": { "label": "Gyeonggi Bus API Key", "sensitive": true },
-    "telegramBotToken": { "label": "Telegram Bot Token", "sensitive": true }
+    "apiKey": { "label": "Bus API Key (data.go.kr)", "sensitive": true }
   }
 }
