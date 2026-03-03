@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 import type { Arrival, Route, Station, StationRef } from '../types.js';
+import { apiKeyError, apiKeyExpiredError, rateLimitError } from '../errors.js';
 
 const BASE_URL = 'http://ws.bus.go.kr/api/rest';
 
@@ -11,6 +12,14 @@ export function createSeoulAdapter(apiKey: string) {
 
   function parseItemList(xml: string): any[] {
     const parsed = parser.parse(xml);
+    const header = parsed?.ServiceResult?.msgHeader;
+    if (header) {
+      const code = String(header.headerCd);
+      const msg = String(header.headerMsg ?? '');
+      if (code === '4' || code === '3') throw apiKeyError('서울', msg);
+      if (code === '5') throw apiKeyExpiredError('서울');
+      if (code === '8') throw rateLimitError('서울');
+    }
     const itemList = parsed?.ServiceResult?.msgBody?.itemList;
     if (!itemList) return [];
     return Array.isArray(itemList) ? itemList : [itemList];

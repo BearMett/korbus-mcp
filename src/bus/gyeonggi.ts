@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Arrival, Route, Station, StationRef } from '../types.js';
+import { apiKeyError, apiKeyExpiredError, rateLimitError } from '../errors.js';
 
 const BASE_URL = 'https://apis.data.go.kr/6410000';
 
@@ -8,6 +9,14 @@ export function createGyeonggiAdapter(apiKey: string) {
   const key = decodeURIComponent(apiKey);
 
   function extractBody(data: any, bodyKey: string): any[] {
+    const header = data?.response?.msgHeader;
+    if (header) {
+      const code = String(header.resultCode ?? '');
+      const msg = String(header.resultMessage ?? '');
+      if (code === '20' || code === '30') throw apiKeyError('경기', msg);
+      if (code === '21' || code === '31') throw apiKeyExpiredError('경기');
+      if (code === '22') throw rateLimitError('경기');
+    }
     const body = data?.response?.msgBody;
     if (!body) return [];
     const items = body[bodyKey];
