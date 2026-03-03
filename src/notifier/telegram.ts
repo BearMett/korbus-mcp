@@ -4,11 +4,14 @@ import type { NotificationPayload } from '../types.js';
 const client = axios.create({ timeout: 10000 });
 
 function formatMessage(payload: NotificationPayload): string {
-  return (
+  let msg =
     `Bus ${payload.routeName} → ${payload.stationName}\n` +
     `${payload.arrivalMsg} (${payload.arrivalSec}s)\n` +
-    `Vehicle: ${payload.vehicleId}`
-  );
+    `Vehicle: ${payload.vehicleId}`;
+  if (payload.nextArrival) {
+    msg += `\nNext: ${payload.nextArrival.arrivalMsg} (${payload.nextArrival.arrivalSec}s)`;
+  }
+  return msg;
 }
 
 export async function sendTelegram(

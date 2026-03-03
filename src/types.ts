@@ -129,6 +129,10 @@ export interface NotificationPayload {
   arrivalSec: number;
   arrivalMsg: string;
   vehicleId: string;
+  nextArrival?: {
+    arrivalSec: number;
+    arrivalMsg: string;
+  };
 }
 
 export interface PollResult {

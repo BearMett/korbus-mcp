@@ -51,18 +51,30 @@ export async function pollActiveAlarms(
       };
 
       const arrivals = await deps.gateway.getArrivals(stationRef, first.route.id);
+      // Sort by arrivalSec ascending (API order not guaranteed)
+      const sorted = [...arrivals].sort((a, b) => a.arrivalSec - b.arrivalSec);
 
       for (const alarm of groupAlarms) {
         let alarmFired = false;
+        const thresholdSec = alarm.alertMinutes * 60;
+        const minCatchableSec = alarm.alertMinutes * 30; // half of threshold
 
-        for (const arrival of arrivals) {
-          if (arrival.arrivalSec > alarm.alertMinutes * 60) continue;
+        for (let i = 0; i < sorted.length; i++) {
+          const arrival = sorted[i];
+          if (arrival.arrivalSec > thresholdSec) continue;    // too far
+          if (arrival.arrivalSec < minCatchableSec) continue;  // missed bus
 
           const vehicleId = arrival.vehicleId || `route:${arrival.routeId}`;
 
           // Dedup once per alarm+vehicle, then dispatch to all channels
           const hasRecent = await hasRecentNotification(alarm.id, vehicleId, since);
           if (hasRecent) continue;
+
+          // Find next bus after this one
+          const next = sorted.find((a, j) => j > i && a.arrivalSec > arrival.arrivalSec);
+          const nextArrival = next
+            ? { arrivalSec: next.arrivalSec, arrivalMsg: next.arrivalMsg }
+            : undefined;
 
           for (const channel of alarm.channels) {
             if (!dryRun) {
@@ -75,6 +87,7 @@ export async function pollActiveAlarms(
                   arrivalSec: arrival.arrivalSec,
                   arrivalMsg: arrival.arrivalMsg,
                   vehicleId,
+                  nextArrival,
                 },
               );
             }
