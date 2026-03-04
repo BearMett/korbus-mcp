@@ -1,5 +1,8 @@
 # korbus-mcp
 
+[![Landing Page](https://img.shields.io/badge/Landing_Page-Visit-blue)](https://bearmett.github.io/korbus-landing)
+[![npm version](https://img.shields.io/npm/v/korbus-mcp)](https://www.npmjs.com/package/korbus-mcp)
+
 서울/경기 실시간 버스 도착 정보를 제공하는 [Model Context Protocol (MCP)](https://modelcontextprotocol.io) 서버입니다.
 
 AI 어시스턴트가 버스 정류장 검색, 노선 조회, 실시간 도착 정보 확인, 알림 설정 등을 수행할 수 있습니다.
