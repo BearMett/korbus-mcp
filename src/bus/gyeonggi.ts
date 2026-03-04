@@ -56,6 +56,8 @@ export function createGyeonggiAdapter(apiKey: string) {
       const res = await client.get(`${BASE_URL}/busarrivalservice/v2/getBusArrivalListv2`, {
         params: { stationId: stationRef.id, serviceKey: key, format: 'json' },
       });
+      // 경기 API는 자체 메시지 필드가 없고 predictTime1(예측 분)만 제공.
+      // 빈 값이면 Number("")=0 → "0분 후 도착" 버그가 발생하므로 직접 필터링.
       return extractBody(res.data, 'busArrivalList').map((item: any) => {
         const pt = item.predictTime1;
         const hasPrediction = pt !== '' && pt !== undefined && pt !== null;

@@ -64,6 +64,9 @@ export function createSeoulAdapter(apiKey: string) {
           return msg !== '운행종료' && msg !== '출발대기';
         })
         .map((item: any) => {
+          // 서울 API는 arrmsg1(텍스트 메시지)과 exps1(예측 초)을 독립적으로 제공.
+          // exps1이 비어있어도 arrmsg1에 "곧 도착" 등 유효 메시지가 올 수 있으므로
+          // arrivalMsg는 arrmsg1을 우선 사용하고, arrivalSec만 hasPrediction으로 제어.
           const rawSec = item.exps1;
           const hasPrediction = rawSec !== undefined && rawSec !== null && String(rawSec) !== '';
           return {
