@@ -73,7 +73,7 @@ export function createSeoulAdapter(apiKey: string) {
             vehicleId: item.vehId1 ? String(item.vehId1) : undefined,
             direction: item.dir ? String(item.dir) : undefined,
             arrivalSec: hasPrediction ? Number(rawSec) : -1,
-            arrivalMsg: hasPrediction ? String(item.arrmsg1) : '도착 정보 없음',
+            arrivalMsg: item.arrmsg1 ? String(item.arrmsg1) : '도착 정보 없음',
           };
         });
     },
