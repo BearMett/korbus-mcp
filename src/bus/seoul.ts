@@ -69,12 +69,14 @@ export function createSeoulAdapter(apiKey: string) {
           // arrivalMsg는 arrmsg1을 우선 사용하고, arrivalSec만 hasPrediction으로 제어.
           const rawSec = item.exps1;
           const hasPrediction = rawSec !== undefined && rawSec !== null && String(rawSec) !== '';
+          // stationNm1: 다음 정류장명 (방면 정보 대용). dir 필드는 이 API에 미존재.
+          const nextStn = typeof item.stationNm1 === 'string' ? item.stationNm1.trim() : '';
           return {
             routeId: String(item.busRouteId),
             routeName: String(item.rtNm || item.busRouteAbrv),
             stationId: String(item.stId),
             vehicleId: item.vehId1 ? String(item.vehId1) : undefined,
-            direction: item.dir ? String(item.dir) : undefined,
+            direction: nextStn || undefined,
             arrivalSec: hasPrediction ? Number(rawSec) : -1,
             arrivalMsg: item.arrmsg1 ? String(item.arrmsg1) : '도착 정보 없음',
           };
