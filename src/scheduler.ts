@@ -25,7 +25,7 @@ export async function pollActiveAlarms(
   const alarms = await listActiveAlarms(now);
 
   if (!alarms.length) {
-    return { checkedAlarms: 0, groupedQueries: 0, notificationsSent: 0, dryRun };
+    return { checkedAlarms: 0, groupedQueries: 0, notificationsSent: 0, skippedAlarms: [], dryRun };
   }
 
   // 2. Group by stationId:routeId to minimize API calls
@@ -37,6 +37,7 @@ export async function pollActiveAlarms(
   }
 
   let notificationsSent = 0;
+  const skippedAlarms: { alarmId: string; reason: string }[] = [];
 
   // 3. Process each group
   const since = new Date(now.getTime() - 10 * 60 * 1000);
@@ -57,10 +58,13 @@ export async function pollActiveAlarms(
       for (const alarm of groupAlarms) {
         let alarmFired = false;
         const thresholdSec = alarm.alertMinutes * 60;
-        const minCatchableSec = alarm.alertMinutes * 30; // half of threshold
+        const minCatchableSec = alarm.type === 'ONCE' ? 60 : alarm.alertMinutes * 30;
 
-        for (let i = 0; i < sorted.length; i++) {
-          const arrival = sorted[i];
+        // Separate actionable arrivals (with prediction) from no-prediction entries
+        const actionable = sorted.filter((a) => a.arrivalSec > 0);
+
+        for (let i = 0; i < actionable.length; i++) {
+          const arrival = actionable[i];
           if (arrival.arrivalSec > thresholdSec) continue;    // too far
           if (arrival.arrivalSec < minCatchableSec) continue;  // missed bus
 
@@ -71,7 +75,7 @@ export async function pollActiveAlarms(
           if (hasRecent) continue;
 
           // Find next bus after this one
-          const next = sorted.find((a, j) => j > i && a.arrivalSec > arrival.arrivalSec);
+          const next = actionable.find((a, j) => j > i && a.arrivalSec > arrival.arrivalSec);
           const nextArrival = next
             ? { arrivalSec: next.arrivalSec, arrivalMsg: next.arrivalMsg }
             : undefined;
@@ -106,6 +110,40 @@ export async function pollActiveAlarms(
           }
         }
 
+        // No-prediction: route exists in API but no actionable arrivals
+        if (sorted.length > 0 && actionable.length === 0) {
+          const noPredVehicleId = 'no-prediction';
+          const hasRecent = await hasRecentNotification(alarm.id, noPredVehicleId, since);
+          if (!hasRecent) {
+            for (const channel of alarm.channels) {
+              if (!dryRun) {
+                await deps.dispatcher.dispatch(
+                  { type: channel.type, config: channel.config },
+                  {
+                    type: 'NO_PREDICTION',
+                    alarmId: alarm.id,
+                    stationName: alarm.station.name,
+                    routeName: alarm.route.name,
+                    arrivalSec: -1,
+                    arrivalMsg: '도착 정보 없음',
+                    vehicleId: noPredVehicleId,
+                  },
+                );
+              }
+              notificationsSent += 1;
+            }
+            if (!dryRun) {
+              await createNotificationLog({
+                alarmId: alarm.id,
+                vehicleId: noPredVehicleId,
+                message: '도착 예측 정보 없음',
+                channel: alarm.channels.map((c) => c.type).join(','),
+              });
+            }
+            skippedAlarms.push({ alarmId: alarm.id, reason: 'NO_PREDICTION' });
+          }
+        }
+
         // Mark ONCE alarms as fired after successful notification
         if (alarmFired && alarm.type === 'ONCE') {
           await markAlarmFired(alarm.id);
@@ -124,6 +162,7 @@ export async function pollActiveAlarms(
     checkedAlarms: alarms.length,
     groupedQueries: groups.size,
     notificationsSent,
+    skippedAlarms,
     dryRun,
   };
 }
