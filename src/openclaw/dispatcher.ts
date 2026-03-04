@@ -18,6 +18,9 @@ export interface OpenClawRuntimeApi {
 // ---------------------------------------------------------------------------
 
 function formatMessage(p: NotificationPayload): string {
+  if (p.type === 'NO_PREDICTION') {
+    return `🚌 ${p.routeName} → ${p.stationName}\n도착 예측 정보를 확인할 수 없습니다.`;
+  }
   return `🚌 ${p.routeName} → ${p.stationName}\n${p.arrivalMsg}`;
 }
 

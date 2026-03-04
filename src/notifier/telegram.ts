@@ -4,6 +4,12 @@ import type { NotificationPayload } from '../types.js';
 const client = axios.create({ timeout: 10000 });
 
 function formatMessage(payload: NotificationPayload): string {
+  if (payload.type === 'NO_PREDICTION') {
+    return (
+      `🚌 ${payload.routeName} → ${payload.stationName}\n` +
+      `도착 예측 정보를 확인할 수 없습니다.`
+    );
+  }
   let msg =
     `Bus ${payload.routeName} → ${payload.stationName}\n` +
     `${payload.arrivalMsg} (${payload.arrivalSec}s)\n` +

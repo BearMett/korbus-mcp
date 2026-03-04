@@ -57,15 +57,17 @@ export function createGyeonggiAdapter(apiKey: string) {
         params: { stationId: stationRef.id, serviceKey: key, format: 'json' },
       });
       return extractBody(res.data, 'busArrivalList').map((item: any) => {
-        const predictMinutes = Number(item.predictTime1);
+        const pt = item.predictTime1;
+        const hasPrediction = pt !== '' && pt !== undefined && pt !== null;
+        const predictMinutes = hasPrediction ? Number(pt) : 0;
         return {
           routeId: String(item.routeId),
           routeName: String(item.routeName),
           stationId: String(item.stationId),
           vehicleId: item.plateNo1 ? String(item.plateNo1) : undefined,
           direction: item.routeDestName ? String(item.routeDestName) : undefined,
-          arrivalSec: predictMinutes * 60,
-          arrivalMsg: `${predictMinutes}분 후 도착`,
+          arrivalSec: hasPrediction ? predictMinutes * 60 : -1,
+          arrivalMsg: hasPrediction ? `${predictMinutes}분 후 도착` : '도착 정보 없음',
         };
       });
     },

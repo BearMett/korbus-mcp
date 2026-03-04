@@ -122,7 +122,10 @@ export interface UpdateAlarmInput {
   channels?: ChannelConfig[];
 }
 
+export type NotificationType = 'ARRIVAL' | 'NO_PREDICTION';
+
 export interface NotificationPayload {
+  type?: NotificationType;
   alarmId: string;
   stationName: string;
   routeName: string;
@@ -139,6 +142,7 @@ export interface PollResult {
   checkedAlarms: number;
   groupedQueries: number;
   notificationsSent: number;
+  skippedAlarms: { alarmId: string; reason: string }[];
   dryRun: boolean;
 }
 

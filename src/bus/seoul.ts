@@ -63,15 +63,19 @@ export function createSeoulAdapter(apiKey: string) {
           const msg = String(item.arrmsg1 || '');
           return msg !== '운행종료' && msg !== '출발대기';
         })
-        .map((item: any) => ({
-          routeId: String(item.busRouteId),
-          routeName: String(item.rtNm || item.busRouteAbrv),
-          stationId: String(item.stId),
-          vehicleId: item.vehId1 ? String(item.vehId1) : undefined,
-          direction: item.dir ? String(item.dir) : undefined,
-          arrivalSec: Number(item.exps1 || 0),
-          arrivalMsg: String(item.arrmsg1),
-        }));
+        .map((item: any) => {
+          const rawSec = item.exps1;
+          const hasPrediction = rawSec !== undefined && rawSec !== null && String(rawSec) !== '';
+          return {
+            routeId: String(item.busRouteId),
+            routeName: String(item.rtNm || item.busRouteAbrv),
+            stationId: String(item.stId),
+            vehicleId: item.vehId1 ? String(item.vehId1) : undefined,
+            direction: item.dir ? String(item.dir) : undefined,
+            arrivalSec: hasPrediction ? Number(rawSec) : -1,
+            arrivalMsg: hasPrediction ? String(item.arrmsg1) : '도착 정보 없음',
+          };
+        });
     },
   };
 }
